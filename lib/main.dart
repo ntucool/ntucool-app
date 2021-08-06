@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ntucool/ntucool.dart';
+import 'package:ntucool_app/client.dart';
 
 import 'dart:convert' as convert;
 import 'dart:io' as io;
@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 void main() {
   runApp(
     Provider(
-      create: (context) => Client(),
+      create: (context) => AppClient(),
       child: MyApp(),
     ),
   );

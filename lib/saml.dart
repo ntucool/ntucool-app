@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ntucool/ntucool.dart';
+import 'package:ntucool_app/client.dart';
 import 'package:provider/provider.dart';
 
 class SamlPage extends StatefulWidget {
@@ -52,16 +52,16 @@ class _MainView extends StatelessWidget {
 
   Future<bool> _login(
       BuildContext context, String username, String password) async {
-    var client = Provider.of<Client>(context, listen: false);
+    var client = Provider.of<AppClient>(context, listen: false);
     // print(client);
     var ok = await client.saml(username, password);
     print(ok);
-    var course = client.listCourses();
-    print(course.toList());
+    var courses = client.listCourses();
+    var e = await courses.forEach((element) {
+      print(element);
+    });
+    print(e);
     return ok;
-    print(username);
-    print(password);
-    return true;
   }
 
   @override
