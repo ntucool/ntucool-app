@@ -30,6 +30,9 @@ dependencies:
   cupertino_icons: ^1.0.2
   provider: ^5.0.0
 
+  ntucool:
+    path: ../ntucool
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

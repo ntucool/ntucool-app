@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ntucool/ntucool.dart';
+import 'package:provider/provider.dart';
 
 class SamlPage extends StatefulWidget {
   const SamlPage({Key? key}) : super(key: key);
@@ -48,7 +50,19 @@ class _MainView extends StatelessWidget {
   final TextEditingController usernameController;
   final TextEditingController passwordController;
 
-  void _login(BuildContext context) {}
+  Future<bool> _login(
+      BuildContext context, String username, String password) async {
+    var client = Provider.of<Client>(context, listen: false);
+    // print(client);
+    var ok = await client.saml(username, password);
+    print(ok);
+    var course = client.listCourses();
+    print(course.toList());
+    return ok;
+    print(username);
+    print(password);
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +71,9 @@ class _MainView extends StatelessWidget {
     listViewChildren = [
       _UsernameInput(usernameController: usernameController),
       _PasswordInput(passwordController: passwordController),
+      _LoginButton(onTap: () {
+        _login(context, usernameController.text, passwordController.text);
+      }),
     ];
 
     return Align(
@@ -126,7 +143,39 @@ class _LoginButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.center,
-      child: null,
+      child: _FilledButton(
+        text: 'Login',
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
+class _FilledButton extends StatelessWidget {
+  const _FilledButton({Key? key, required this.text, required this.onTap})
+      : super(key: key);
+
+  final String text;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      style: TextButton.styleFrom(
+        primary: Colors.black,
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      onPressed: onTap,
+      child: Row(
+        children: [
+          const Icon(Icons.lock),
+          const SizedBox(width: 6),
+          Text(text),
+        ],
+      ),
     );
   }
 }
