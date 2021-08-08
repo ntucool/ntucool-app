@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:ntucool_app/client.dart';
 import 'package:provider/provider.dart';
+import 'package:ntucool/src/http/cookies.dart' show SimpleCookie;
+
+import 'client.dart';
+import 'dashboard.dart';
+import 'storage.dart';
 
 class SamlPage extends StatefulWidget {
   const SamlPage({Key? key}) : super(key: key);
@@ -53,15 +59,44 @@ class _MainView extends StatelessWidget {
   Future<bool> _login(
       BuildContext context, String username, String password) async {
     var client = Provider.of<AppClient>(context, listen: false);
-    // print(client);
-    var ok = await client.saml(username, password);
-    print(ok);
-    var courses = client.listCourses();
-    var e = await courses.forEach((element) {
+    var file = await cookieFile;
+    var exists = await file.exists();
+    if (exists) {
+      var json = jsonDecode(await file.readAsString());
+      var cookies = SimpleCookie.fromJson(json);
+      client.session.cookieJar.updateCookies(cookies);
+    } else {
+      var ok = await client.saml(username, password);
+      assert(ok);
+      var file = await cookieFile;
+      await file.writeAsString(
+          jsonEncode(client.session.cookieJar.filterCookies(client.baseUrl)));
+    }
+    var courses = client.api.courses.getCourses();
+    await courses.forEach((element) {
       print(element);
     });
-    print(e);
-    return ok;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) {
+          return Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+            ),
+            body: Dashboard(),
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              items: [
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.coronavirus), label: 'coronavirus'),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+    return true;
   }
 
   @override
@@ -76,11 +111,14 @@ class _MainView extends StatelessWidget {
       }),
     ];
 
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ListView(
-        restorationId: 'saml_list_view',
-        children: listViewChildren,
+    return Expanded(
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ListView(
+          restorationId: 'saml_list_view',
+          children: listViewChildren,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+        ),
       ),
     );
   }
@@ -119,12 +157,15 @@ class _PasswordInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.center,
-      child: TextField(
-        controller: passwordController,
-        decoration: InputDecoration(
-          labelText: 'Password',
+    return Container(
+      child: Align(
+        alignment: Alignment.center,
+        child: TextField(
+          controller: passwordController,
+          decoration: InputDecoration(
+            labelText: 'Password',
+          ),
+          obscureText: true,
         ),
       ),
     );
