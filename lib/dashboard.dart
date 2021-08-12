@@ -18,6 +18,7 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   void initState() {
+    super.initState();
     var client = Provider.of<AppClient>(context, listen: false);
     client.api.users.getCustomColors(id: 'self').then((customColors) {
       _customColors = customColors;
@@ -27,7 +28,6 @@ class _DashboardState extends State<Dashboard> {
         });
       });
     });
-    super.initState();
   }
 
   @override

@@ -1,18 +1,19 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:ntucool_app/scaffold.dart';
 import 'package:provider/provider.dart';
 import 'package:ntucool/src/http/cookies.dart' show SimpleCookie;
 
-import 'client.dart';
-import 'dashboard.dart';
-import 'storage.dart';
+import 'client.dart' show AppClient;
+import 'dashboard.dart' show Dashboard;
+import 'storage.dart' show cookieFile;
 
 class SamlPage extends StatefulWidget {
   const SamlPage({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _SamlPageState();
+  _SamlPageState createState() => _SamlPageState();
 }
 
 class _SamlPageState extends State<SamlPage> with RestorationMixin {
@@ -24,13 +25,15 @@ class _SamlPageState extends State<SamlPage> with RestorationMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-      ),
       body: SafeArea(
-        child: _MainView(
-          usernameController: _usernameController.value,
-          passwordController: _passwordController.value,
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24),
+            child: _MainView(
+              usernameController: _usernameController.value,
+              passwordController: _passwordController.value,
+            ),
+          ),
         ),
       ),
     );
@@ -56,12 +59,12 @@ class _MainView extends StatelessWidget {
   final TextEditingController usernameController;
   final TextEditingController passwordController;
 
-  Future<bool> _login(
+  Future<bool> _signIn(
       BuildContext context, String username, String password) async {
     var client = Provider.of<AppClient>(context, listen: false);
     var file = await cookieFile;
     var exists = await file.exists();
-    if (exists) {
+    if (username.isEmpty && password.isEmpty && exists) {
       var json = jsonDecode(await file.readAsString());
       var cookies = SimpleCookie.fromJson(json);
       client.session.cookieJar.updateCookies(cookies);
@@ -72,27 +75,14 @@ class _MainView extends StatelessWidget {
       await file.writeAsString(
           jsonEncode(client.session.cookieJar.filterCookies(client.baseUrl)));
     }
-    var courses = client.api.courses.getCourses();
-    await courses.forEach((element) {
-      print(element);
-    });
+    // var courses = client.api.courses.getCourses();
+    // await courses.forEach((element) {
+    //   print(element);
+    // });
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) {
-          return Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-            ),
-            body: Dashboard(),
-            bottomNavigationBar: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              items: [
-                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.coronavirus), label: 'coronavirus'),
-              ],
-            ),
-          );
+          return CoolScaffold();
         },
       ),
     );
@@ -101,25 +91,23 @@ class _MainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> listViewChildren;
-
-    listViewChildren = [
-      _UsernameInput(usernameController: usernameController),
-      _PasswordInput(passwordController: passwordController),
-      _LoginButton(onTap: () {
-        _login(context, usernameController.text, passwordController.text);
-      }),
-    ];
-
-    return Expanded(
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: ListView(
-          restorationId: 'saml_list_view',
-          children: listViewChildren,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Icon(
+          Icons.catching_pokemon,
+          size: 64,
         ),
-      ),
+        SizedBox(height: 24),
+        _UsernameInput(usernameController: usernameController),
+        SizedBox(height: 12),
+        _PasswordInput(passwordController: passwordController),
+        SizedBox(height: 12),
+        _SignInButton(onPressed: () {
+          _signIn(context, usernameController.text, passwordController.text);
+        }),
+      ],
     );
   }
 }
@@ -134,15 +122,13 @@ class _UsernameInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.center,
-      child: TextField(
-        textInputAction: TextInputAction.next,
-        controller: usernameController,
-        decoration: InputDecoration(
-          labelText: 'Username',
-        ),
+    return TextField(
+      controller: usernameController,
+      decoration: InputDecoration(
+        labelText: 'User name',
+        border: OutlineInputBorder(),
       ),
+      textInputAction: TextInputAction.next,
     );
   }
 }
@@ -157,66 +143,32 @@ class _PasswordInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Align(
-        alignment: Alignment.center,
-        child: TextField(
-          controller: passwordController,
-          decoration: InputDecoration(
-            labelText: 'Password',
-          ),
-          obscureText: true,
-        ),
+    return TextField(
+      controller: passwordController,
+      decoration: InputDecoration(
+        labelText: 'Password',
+        border: OutlineInputBorder(),
+        // alignLabelWithHint: true,
       ),
+      obscureText: true,
     );
   }
 }
 
-class _LoginButton extends StatelessWidget {
-  const _LoginButton({
+class _SignInButton extends StatelessWidget {
+  const _SignInButton({
     Key? key,
-    required this.onTap,
+    required this.onPressed,
   }) : super(key: key);
 
-  final VoidCallback onTap;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.center,
-      child: _FilledButton(
-        text: 'Login',
-        onTap: onTap,
-      ),
-    );
-  }
-}
-
-class _FilledButton extends StatelessWidget {
-  const _FilledButton({Key? key, required this.text, required this.onTap})
-      : super(key: key);
-
-  final String text;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      style: TextButton.styleFrom(
-        primary: Colors.black,
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      onPressed: onTap,
-      child: Row(
-        children: [
-          const Icon(Icons.lock),
-          const SizedBox(width: 6),
-          Text(text),
-        ],
-      ),
+    return ElevatedButton(
+      onPressed: onPressed,
+      child: Text('Sign In'),
+      style: ElevatedButton.styleFrom(elevation: 0),
     );
   }
 }
