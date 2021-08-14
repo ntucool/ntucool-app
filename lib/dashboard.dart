@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:ntucool/ntucool.dart' as ntucool;
-import 'package:ntucool_app/client.dart';
 import 'package:provider/provider.dart';
+
+import 'client.dart';
+import 'course.dart';
 
 const sentinel = ntucool.sentinel;
 
@@ -13,35 +15,55 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  var _dashboardCards = <ntucool.DashboardCard>[];
+  List<ntucool.DashboardCard>? _dashboardCards;
   var _customColors;
 
   @override
   void initState() {
     super.initState();
+    _getData();
+  }
+
+  void _getData() {
     var client = Provider.of<AppClient>(context, listen: false);
-    client.api.users.getCustomColors(id: 'self').then((customColors) {
-      _customColors = customColors;
-      client.api.dashboards.getDashboardCards().then((value) {
-        setState(() {
-          _dashboardCards = value;
-        });
+    () async {
+      var value = await client.api.users.getCustomColors(id: 'self');
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _customColors = value;
       });
-    });
+    }();
+    () async {
+      var value = await client.api.dashboards.getDashboardCards();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _dashboardCards = value;
+      });
+    }();
   }
 
   @override
   Widget build(BuildContext context) {
+    var dashboardCards = _dashboardCards;
+    if (dashboardCards == null) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
     return ListView.separated(
         padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         itemBuilder: (context, index) {
           return DashboardCardWidget(
-            dashboardCard: _dashboardCards[index],
+            dashboardCard: dashboardCards[index],
             customColors: _customColors,
           );
         },
         separatorBuilder: (context, index) => SizedBox(height: 12),
-        itemCount: _dashboardCards.length);
+        itemCount: dashboardCards.length);
   }
 }
 
@@ -52,9 +74,9 @@ class DashboardCardSingleColorImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Ink(
       color: color,
-      height: 200,
+      height: 120,
     );
   }
 }
@@ -96,54 +118,76 @@ class DashboardCardWidget extends StatelessWidget {
         }
       }
     } else {
-      image = Image.network(dashboardCard.image.toString());
+      image = Center(
+        child: Image.network(dashboardCard.image.toString()),
+      );
+      image = Ink.image(
+        image: NetworkImage(
+          dashboardCard.image.toString(),
+        ),
+        height: 120,
+      );
     }
     return Card(
       // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       margin: EdgeInsets.only(),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            child: image,
-          ),
-          SizedBox(
-            height: 12,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
-            child: SelectableText(
-              dashboardCard.shortName.toString(),
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+      child: InkWell(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            image,
+            SizedBox(
+              height: 12,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                dashboardCard.shortName.toString(),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          SizedBox(
-            height: 6,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
-            child: SelectableText(
-              dashboardCard.courseCode.toString(),
+            SizedBox(
+              height: 6,
             ),
-          ),
-          SizedBox(
-            height: 6,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
-            child: SelectableText(
-              dashboardCard.term.toString(),
-              style: Theme.of(context).textTheme.caption,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                dashboardCard.courseCode.toString(),
+              ),
             ),
-          ),
-          SizedBox(
-            height: 12,
-          ),
-        ],
+            SizedBox(
+              height: 6,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                dashboardCard.term.toString(),
+                style: Theme.of(context).textTheme.caption,
+              ),
+            ),
+            SizedBox(
+              height: 12,
+            ),
+          ],
+        ),
+        onTap: () {
+          var id = dashboardCard.id;
+          if (id == sentinel || id == null) {
+            // TODO: Show something.
+            return;
+          }
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (context) {
+                return CoursePage(id: id);
+              },
+            ),
+          );
+        },
       ),
     );
   }
