@@ -3,6 +3,7 @@ import 'package:ntucool/ntucool.dart' as ntucool;
 import 'package:provider/provider.dart';
 
 import 'client.dart' show AppClient;
+import 'course.dart' show CoursePage;
 
 const sentinel = ntucool.sentinel;
 
@@ -93,20 +94,51 @@ class _CoursesState extends State<Courses> {
             }
           }
         }
+
+        // Build subtitle.
+        Column? subtitle;
+        var columnChildren = <Widget>[];
+        Text? term;
+        var courseTerm = course.term;
+        if (courseTerm is ntucool.Term) {
+          term = Text(courseTerm.name.toString());
+        }
+        if (term != null) {
+          columnChildren.add(term);
+        }
+        // TODO: Show enrollments.
+        if (columnChildren.isNotEmpty) {
+          subtitle = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: columnChildren,
+          );
+        }
+
         return ListTile(
           leading: Center(
             widthFactor: 1,
             child: Container(
-              alignment: Alignment.center,
               color: color,
               width: 24,
               height: 24,
             ),
           ),
           title: Text(course.name.toString()),
-          subtitle: Text(course.term == sentinel
-              ? ''
-              : (course.term as ntucool.Term).name.toString()),
+          subtitle: subtitle,
+          onTap: () {
+            var id = course.id;
+            if (id == sentinel || id == null) {
+              // TODO: Show something.
+              return;
+            }
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) {
+                  return CoursePage(id: id);
+                },
+              ),
+            );
+          },
         );
       },
       separatorBuilder: (context, index) => Divider(),

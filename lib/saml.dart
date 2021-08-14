@@ -1,12 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:ntucool_app/scaffold.dart';
 import 'package:provider/provider.dart';
 import 'package:ntucool/src/http/cookies.dart' show SimpleCookie;
 
-import 'client.dart' show AppClient;
-import 'dashboard.dart' show Dashboard;
+import 'client.dart';
+import 'home.dart';
 import 'storage.dart' show cookieFile;
 
 class SamlPage extends StatefulWidget {
@@ -75,14 +74,10 @@ class _MainView extends StatelessWidget {
       await file.writeAsString(
           jsonEncode(client.session.cookieJar.filterCookies(client.baseUrl)));
     }
-    // var courses = client.api.courses.getCourses();
-    // await courses.forEach((element) {
-    //   print(element);
-    // });
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) {
-          return CoolScaffold();
+          return Home();
         },
       ),
     );
