@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:ntucool/ntucool.dart' as ntucool;
-import 'package:ntucool_app/html.dart';
 import 'package:provider/provider.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'client.dart' show AppClient;
+import 'html.dart';
 
 class Syllabus extends StatefulWidget {
   const Syllabus({
@@ -51,6 +54,16 @@ class _SyllabusState extends State<Syllabus> {
             var course = snapshot.data!;
             var syllabusBody = course.syllabusBody;
             if (syllabusBody is String) {
+              return Padding(
+                padding: EdgeInsets.all(8),
+                child: WebView(
+                  initialUrl: Uri.dataFromString(
+                    syllabusBody,
+                    mimeType: 'text/html',
+                    encoding: utf8,
+                  ).toString(),
+                ),
+              );
               return SingleChildScrollView(
                 padding: EdgeInsets.all(12),
                 child: Html(input: syllabusBody),
