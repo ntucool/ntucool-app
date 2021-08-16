@@ -29,7 +29,7 @@ class _CoursesState extends State<Courses> {
         _customColors = customColors;
       });
     })();
-    _courses = client.api.courses.getCourses(include: ['term']);
+    _courses = client.api.courses.listCourses(include: ['term']);
   }
 
   @override
@@ -41,7 +41,6 @@ class _CoursesState extends State<Courses> {
     }
     var perPage = 2;
     return ListView.separated(
-      padding: EdgeInsets.symmetric(vertical: 8),
       itemBuilder: (context, index) {
         ntucool.Course course;
         try {
@@ -70,6 +69,7 @@ class _CoursesState extends State<Courses> {
             title: Center(
               child: CircularProgressIndicator(),
             ),
+            contentPadding: EdgeInsets.symmetric(vertical: 8),
           );
         }
         Color? color;
@@ -114,13 +114,15 @@ class _CoursesState extends State<Courses> {
           );
         }
 
+        var size = IconTheme.of(context).size ?? 24.0;
+
         return ListTile(
           leading: Center(
             widthFactor: 1,
             child: Container(
               color: color,
-              width: 24,
-              height: 24,
+              width: size,
+              height: size,
             ),
           ),
           title: Text(course.name.toString()),
@@ -141,7 +143,9 @@ class _CoursesState extends State<Courses> {
           },
         );
       },
-      separatorBuilder: (context, index) => Divider(),
+      separatorBuilder: (context, index) => Divider(
+        height: 0,
+      ),
       itemCount: _coursesLength ?? courses.values.length + 1,
     );
   }
