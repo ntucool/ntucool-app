@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:ntucool/ntucool.dart' as ntucool;
-import 'package:ntucool_app/syllabus.dart';
 import 'package:provider/provider.dart';
 
 import 'client.dart';
+import 'people.dart';
+import 'syllabus.dart';
 
 const sentinel = ntucool.sentinel;
 
@@ -43,32 +44,49 @@ class _CoursePageState extends State<CoursePage> {
   @override
   void initState() {
     super.initState();
-    _toTab();
+
+    // Try to go to home tab.
+    _toHome();
+
     var client = Provider.of<AppClient>(context, listen: false);
+
+    // Get course info.
     (() async {
       var course = await client.api.courses
           .getCourse(id: widget.id, include: ['course_image']);
-      // course.attributes.forEach((key, value) {
-      //   print([key, value]);
-      // });
       if (!mounted) {
         return;
       }
-      setState(() {
-        _course = course;
-        _toTab();
-      });
+
+      _course = course;
+
+      // If not navigated yet, try to navigate to home.
+      if (_selectedTabIndex == null) {
+        _toHome();
+      }
+
+      setState(() {});
     })();
+
+    // Get course tab info.
     (() async {
       var tabs =
           await client.api.courses.getAvailableTabs(id: widget.id).toList();
       if (!mounted) {
         return;
       }
-      setState(() {
-        _tabs = tabs;
-      });
+
+      _tabs = tabs;
+
+      // If not navigated yet, try to navigate to home.
+      if (_selectedTabIndex == null) {
+        _toHome();
+      }
+
+      setState(() {});
     })();
+
+    // Get custom colors.
     (() async {
       var customColors = await client.api.users.getCustomColors(id: 'self');
       if (!mounted) {
@@ -80,17 +98,25 @@ class _CoursePageState extends State<CoursePage> {
     })();
   }
 
-  void _toTab([ntucool.Tab? tab, int? index]) {
-    if (index != null) {
-      _selectedTabIndex = index;
-    }
-    if (tab == null) {
-      var course = _course;
-      if (course == null) {
-        _body = Center(
-          child: CircularProgressIndicator(),
+  /// Navigate to [tab]. Set [_selectedTabIndex] to [index].
+  void _toTab(ntucool.Tab tab, int index) {
+    _selectedTabIndex = index;
+    var id = tab.id;
+    switch (id) {
+      case 'syllabus':
+        _body = Syllabus(
+          courseId: widget.id,
         );
-      } else {
+        break;
+      case 'home':
+        _toHome(tab);
+        break;
+      case 'people':
+        _body = People(
+          courseId: widget.id,
+        );
+        break;
+      default:
         _body = Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -99,30 +125,62 @@ class _CoursePageState extends State<CoursePage> {
                 Icons.sentiment_dissatisfied_rounded,
                 size: 240,
               ),
+              SizedBox(height: 12),
+              Text('${tab.label} is not supported.'),
             ],
           ),
         );
+    }
+  }
+
+  void _toHome([ntucool.Tab? tab]) {
+    var course = _course;
+    var tabs = _tabs;
+    var homeTab = tab;
+    int? homeTabIndex;
+    if (homeTab == null && tabs != null) {
+      for (var i = 0; i < tabs.length; i++) {
+        var tab = tabs[i];
+        if (tab.id == 'home') {
+          homeTab = tab;
+          homeTabIndex = i;
+          break;
+        }
       }
+    }
+    if (course == null) {
+      _body = Center(
+        child: CircularProgressIndicator(),
+      );
     } else {
-      var id = tab.id;
-      switch (id) {
+      _selectedTabIndex = homeTabIndex;
+      var defaultView = course.defaultView;
+      print(['defaultView', defaultView]);
+      switch (defaultView) {
         case 'syllabus':
           _body = Syllabus(
             courseId: widget.id,
           );
           break;
         default:
+          var children = <Widget>[
+            Icon(
+              Icons.sentiment_dissatisfied_rounded,
+              size: 240,
+            ),
+          ];
+          if (homeTab != null) {
+            children.addAll(
+              [
+                SizedBox(height: 12),
+                Text('${homeTab.label} is not supported.'),
+              ],
+            );
+          }
           _body = Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.sentiment_dissatisfied_rounded,
-                  size: 240,
-                ),
-                SizedBox(height: 12),
-                Text('${tab.label} is not supported.'),
-              ],
+              children: children,
             ),
           );
       }
@@ -135,15 +193,14 @@ class _CoursePageState extends State<CoursePage> {
 
     Text? title;
     String? assetString;
-    void Function(ntucool.Tab tab, int? index)? onTap;
+    void Function(ntucool.Tab tab, int index)? onTap;
     if (course != null) {
       title = Text(course.courseCode.toString());
       var id = course.id;
       if (id != sentinel) {
         assetString = 'course_$id';
       }
-      onTap = (ntucool.Tab tab, int? index) {
-        print(['defaultView', course.defaultView]);
+      onTap = (ntucool.Tab tab, int index) {
         _toTab(tab, index);
         setState(() {
           Navigator.of(context).pop();
@@ -193,25 +250,28 @@ class CourseDrawer extends StatelessWidget {
   CourseDrawer({
     Key? key,
     this.course,
-    this.customColors,
     this.tabs,
     this.onTap,
     this.selectedTabIndex,
   }) : super(key: key);
 
   final ntucool.Course? course;
-  final customColors;
   final List<ntucool.Tab>? tabs;
-  final void Function(ntucool.Tab tab, int? index)? onTap;
+  final void Function(ntucool.Tab tab, int index)? onTap;
   final int? selectedTabIndex;
 
   @override
   Widget build(BuildContext context) {
     var course = this.course;
-    var imageDownloadUrl = course?.imageDownloadUrl;
-    BoxDecoration decoration = BoxDecoration(
-      color: Theme.of(context).primaryColor.withOpacity(0.5),
-    );
+
+    Object? imageDownloadUrl;
+    String? data;
+    if (course != null) {
+      imageDownloadUrl = course.imageDownloadUrl;
+      data = course.courseCode.toString();
+    }
+
+    BoxDecoration decoration;
     if (imageDownloadUrl is String) {
       decoration = BoxDecoration(
         image: DecorationImage(
@@ -223,8 +283,12 @@ class CourseDrawer extends StatelessWidget {
           fit: BoxFit.cover,
         ),
       );
-    } else {}
-    var data = course?.courseCode.toString();
+    } else {
+      decoration = BoxDecoration(
+        color: Theme.of(context).primaryColor.withOpacity(0.5),
+      );
+    }
+
     Align? drawHeaderChild;
     if (data != null) {
       drawHeaderChild = Align(
@@ -232,6 +296,7 @@ class CourseDrawer extends StatelessWidget {
         child: Text(data),
       );
     }
+
     var children = <Widget>[
       DrawerHeader(
         decoration: decoration,
@@ -239,8 +304,17 @@ class CourseDrawer extends StatelessWidget {
         child: drawHeaderChild,
       ),
     ];
+
     var tabs = this.tabs;
-    if (tabs != null) {
+    if (tabs == null) {
+      children.add(
+        ListTile(
+          title: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    } else {
       var onTap = this.onTap;
       for (var index = 0; index < tabs.length; index++) {
         var tab = tabs[index];
@@ -256,6 +330,7 @@ class CourseDrawer extends StatelessWidget {
         ));
       }
     }
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
