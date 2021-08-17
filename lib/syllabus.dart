@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'client.dart' show AppClient;
-import 'html.dart';
+// import 'html.dart';
 
 class Syllabus extends StatefulWidget {
   const Syllabus({
@@ -64,10 +64,10 @@ class _SyllabusState extends State<Syllabus> {
                   ).toString(),
                 ),
               );
-              return SingleChildScrollView(
-                padding: EdgeInsets.all(12),
-                child: Html(input: syllabusBody),
-              );
+              // return SingleChildScrollView(
+              //   padding: EdgeInsets.all(12),
+              //   child: Html(input: syllabusBody),
+              // );
             } else {
               // TODO: Show something helpful.
               return Center(

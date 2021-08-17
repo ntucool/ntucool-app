@@ -114,6 +114,15 @@ class NodeWidget extends StatelessWidget {
             case 'br':
               widget = Container();
               break;
+            case 'ul':
+              widget = Column(
+                children: [
+                  for (var element in node.nodes) NodeWidget(node: element)
+                ],
+              );
+              break;
+            case 'li':
+              break;
             default:
               print(node.localName);
               widget = Container(

@@ -8,7 +8,10 @@ import 'paginated_list_view.dart';
 const sentinel = ntucool.sentinel;
 
 class People extends StatefulWidget {
-  const People({Key? key, required this.courseId}) : super(key: key);
+  const People({
+    Key? key,
+    required this.courseId,
+  }) : super(key: key);
 
   final Object courseId;
 
@@ -19,8 +22,9 @@ class People extends StatefulWidget {
 class _PeopleState extends State<People> {
   @override
   Widget build(BuildContext context) {
+    var courseId = widget.courseId;
     // TODO: Implement Groups.
-    return Everyone(courseId: widget.courseId);
+    return Everyone(courseId: courseId);
   }
 }
 
@@ -88,11 +92,12 @@ class _EveryoneState extends State<Everyone> {
   Widget build(BuildContext context) {
     var perPage = widget.perPage;
     var users = _users;
+
     return CoolPaginatedListView<ntucool.User>(
       pagination: users,
       perPage: perPage,
       itemBuilder: (context, index, user) {
-        // build leading
+        // Build leading.
         Widget leading;
         var avatarUrl = user.avatarUrl;
         if (avatarUrl is String) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ntucool/ntucool.dart' as ntucool;
+import 'package:ntucool_app/announcements.dart';
 import 'package:provider/provider.dart';
 
 import 'client.dart';
@@ -101,11 +102,17 @@ class _CoursePageState extends State<CoursePage> {
   /// Navigate to [tab]. Set [_selectedTabIndex] to [index].
   void _toTab(ntucool.Tab tab, int index) {
     _selectedTabIndex = index;
-    var id = tab.id;
-    switch (id) {
+    var courseId = widget.id;
+    var tabId = tab.id;
+    switch (tabId) {
+      case 'announcements':
+        _body = Announcements(
+          courseId: courseId,
+        );
+        break;
       case 'syllabus':
         _body = Syllabus(
-          courseId: widget.id,
+          courseId: courseId,
         );
         break;
       case 'home':
@@ -113,7 +120,7 @@ class _CoursePageState extends State<CoursePage> {
         break;
       case 'people':
         _body = People(
-          courseId: widget.id,
+          courseId: courseId,
         );
         break;
       default:
