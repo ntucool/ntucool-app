@@ -6,12 +6,18 @@ class CoolPaginatedListView<T> extends StatefulWidget {
     Key? key,
     required this.pagination,
     required this.perPage,
+    this.physics,
+    this.shrinkWrap = false,
+    this.padding,
     required this.itemBuilder,
     required this.separatorBuilder,
   }) : super(key: key);
 
   final ntucool.Pagination<T> pagination;
   final int perPage;
+  final ScrollPhysics? physics;
+  final bool shrinkWrap;
+  final EdgeInsetsGeometry? padding;
   final Widget Function(BuildContext context, int index, T item) itemBuilder;
   final IndexedWidgetBuilder separatorBuilder;
 
@@ -27,6 +33,9 @@ class _CoolPaginatedListViewState<T> extends State<CoolPaginatedListView<T>> {
   Widget build(BuildContext context) {
     var perPage = widget.perPage;
     return ListView.separated(
+      physics: widget.physics,
+      shrinkWrap: widget.shrinkWrap,
+      padding: widget.padding,
       itemBuilder: (context, index) {
         T item;
         try {

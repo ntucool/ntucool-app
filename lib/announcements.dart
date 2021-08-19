@@ -30,7 +30,7 @@ class _AnnouncementsState extends State<Announcements> {
     var courseId = widget.courseId;
     var body = _body;
     if (body == null) {
-      return AnnouncementsList(
+      return AnnouncementList(
         courseId: courseId,
         onTap: (index, announcement) {
           var htmlUrl = announcement.htmlUrl;
@@ -60,8 +60,8 @@ class _AnnouncementsState extends State<Announcements> {
   }
 }
 
-class AnnouncementsList extends StatefulWidget {
-  const AnnouncementsList({
+class AnnouncementList extends StatefulWidget {
+  const AnnouncementList({
     Key? key,
     required this.courseId,
     this.perPage = 40,
@@ -73,10 +73,10 @@ class AnnouncementsList extends StatefulWidget {
   final void Function(int index, ntucool.DiscussionTopic announcement)? onTap;
 
   @override
-  _AnnouncementsListState createState() => _AnnouncementsListState();
+  _AnnouncementListState createState() => _AnnouncementListState();
 }
 
-class _AnnouncementsListState extends State<AnnouncementsList> {
+class _AnnouncementListState extends State<AnnouncementList> {
   late final ntucool.Pagination<ntucool.DiscussionTopic> _announcements;
 
   @override

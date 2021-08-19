@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ntucool/ntucool.dart' as ntucool;
 import 'package:ntucool_app/announcements.dart';
+import 'package:ntucool_app/modules.dart';
 import 'package:provider/provider.dart';
 
 import 'client.dart';
@@ -110,13 +111,18 @@ class _CoursePageState extends State<CoursePage> {
           courseId: courseId,
         );
         break;
+      case 'modules':
+        _body = Modules(
+          courseId: courseId,
+        );
+        break;
       case 'syllabus':
         _body = Syllabus(
           courseId: courseId,
         );
         break;
       case 'home':
-        _toHome(tab);
+        _toHome(tab, index);
         break;
       case 'people':
         _body = People(
@@ -140,33 +146,47 @@ class _CoursePageState extends State<CoursePage> {
     }
   }
 
-  void _toHome([ntucool.Tab? tab]) {
+  void _toHome([ntucool.Tab? tab, int? index]) {
+    var courseId = widget.id;
     var course = _course;
     var tabs = _tabs;
+
     var homeTab = tab;
-    int? homeTabIndex;
-    if (homeTab == null && tabs != null) {
+    var homeTabIndex = index;
+
+    // If home tab is not provided, try to find home tab from tabs if tabs are
+    // available.
+    if ((homeTab == null || homeTabIndex == null) && tabs != null) {
       for (var i = 0; i < tabs.length; i++) {
         var tab = tabs[i];
         if (tab.id == 'home') {
-          homeTab = tab;
-          homeTabIndex = i;
+          homeTab ??= tab;
+          homeTabIndex ??= i;
           break;
         }
       }
     }
+
+    print(homeTabIndex);
+
     if (course == null) {
       _body = Center(
         child: CircularProgressIndicator(),
       );
     } else {
       _selectedTabIndex = homeTabIndex;
+
       var defaultView = course.defaultView;
       print(['defaultView', defaultView]);
       switch (defaultView) {
+        case 'modules':
+          _body = Modules(
+            courseId: courseId,
+          );
+          break;
         case 'syllabus':
           _body = Syllabus(
-            courseId: widget.id,
+            courseId: courseId,
           );
           break;
         default:
@@ -215,12 +235,14 @@ class _CoursePageState extends State<CoursePage> {
       };
     }
 
+    var body = _body;
+
     var scaffold = Scaffold(
       appBar: AppBar(
         leading: BackButton(),
         title: title,
       ),
-      body: _body,
+      body: body,
       endDrawer: CourseDrawer(
         course: course,
         tabs: _tabs,
@@ -242,8 +264,9 @@ class _CoursePageState extends State<CoursePage> {
           var value = int.tryParse('FF' + hexColor.substring(1), radix: 16);
           if (value != null) {
             return Theme(
-                data: Theme.of(context).copyWith(primaryColor: Color(value)),
-                child: scaffold);
+              data: Theme.of(context).copyWith(primaryColor: Color(value)),
+              child: scaffold,
+            );
           }
         }
       }
