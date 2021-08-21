@@ -170,7 +170,7 @@ class _AnnouncementListState extends State<AnnouncementList> {
               children: rowChildren,
             ),
             const SizedBox(
-              height: 4.0,
+              height: 4,
             ),
             Text(
               announcement.title.toString(),
@@ -190,7 +190,7 @@ class _AnnouncementListState extends State<AnnouncementList> {
             data = document.documentElement?.text;
             if (data != null) {
               subtitle = Container(
-                padding: EdgeInsets.only(top: 4.0),
+                padding: EdgeInsets.only(top: 4),
                 child: Text(
                   data.replaceAll(RegExp(r'\n+'), ' '),
                   overflow: TextOverflow.ellipsis,
@@ -212,11 +212,11 @@ class _AnnouncementListState extends State<AnnouncementList> {
           title: title,
           subtitle: subtitle,
           contentPadding: EdgeInsets.symmetric(
-            vertical: 8.0,
-            horizontal: 16.0,
+            vertical: 8,
+            horizontal: 16,
           ),
           onTap: onTap,
-          horizontalTitleGap: 8.0,
+          horizontalTitleGap: 8,
         );
       },
       separatorBuilder: (context, index) => Divider(

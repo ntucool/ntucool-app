@@ -101,7 +101,7 @@ class _EveryoneState extends State<Everyone> {
         Widget leading;
         var avatarUrl = user.avatarUrl;
         if (avatarUrl is String) {
-          var size = IconTheme.of(context).size ?? 24.0;
+          var size = IconTheme.of(context).size ?? 24;
           leading = ClipOval(
             child: Image.network(
               avatarUrl,

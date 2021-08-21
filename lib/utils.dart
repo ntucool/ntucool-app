@@ -34,3 +34,22 @@ T? castOrNull<T>(Object? source) {
   }
   return null;
 }
+
+String? tryFormat(
+  String format(DateTime date),
+  Object? formattedString, {
+  bool isUtc = true,
+}) {
+  if (formattedString is String) {
+    var date = DateTime.tryParse(formattedString);
+    if (date != null) {
+      if (isUtc) {
+        date = date.toUtc();
+      } else {
+        date = date.toLocal();
+      }
+      return format(date);
+    }
+  }
+  return null;
+}

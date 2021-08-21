@@ -114,7 +114,7 @@ class _CoursesState extends State<Courses> {
           );
         }
 
-        var size = IconTheme.of(context).size ?? 24.0;
+        var size = IconTheme.of(context).size ?? 24;
 
         return ListTile(
           leading: Center(

@@ -5,6 +5,7 @@ import 'package:ntucool_app/modules.dart';
 import 'package:provider/provider.dart';
 
 import 'client.dart';
+import 'pages.dart';
 import 'people.dart';
 import 'syllabus.dart';
 
@@ -107,38 +108,33 @@ class _CoursePageState extends State<CoursePage> {
     var tabId = tab.id;
     switch (tabId) {
       case 'announcements':
-        _body = Announcements(
-          courseId: courseId,
-        );
-        break;
-      case 'modules':
-        _body = Modules(
-          courseId: courseId,
-        );
-        break;
-      case 'syllabus':
-        _body = Syllabus(
-          courseId: courseId,
-        );
+        _body = Announcements(courseId: courseId);
         break;
       case 'home':
         _toHome(tab, index);
         break;
+      case 'modules':
+        _body = Modules(courseId: courseId);
+        break;
+      case 'pages':
+        _body = Pages(courseId: courseId);
+        break;
       case 'people':
-        _body = People(
-          courseId: courseId,
-        );
+        _body = People(courseId: courseId);
+        break;
+      case 'syllabus':
+        _body = Syllabus(courseId: courseId);
         break;
       default:
         _body = Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.sentiment_dissatisfied_rounded,
                 size: 240,
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Text('${tab.label} is not supported.'),
             ],
           ),
@@ -166,8 +162,6 @@ class _CoursePageState extends State<CoursePage> {
         }
       }
     }
-
-    print(homeTabIndex);
 
     if (course == null) {
       _body = Center(

@@ -88,7 +88,7 @@ class _ModuleListState extends State<ModuleList> {
     return CoolPaginatedListView<ntucool.Module>(
       pagination: modules,
       perPage: perPage,
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(12),
       itemBuilder: (context, index, module) {
         return ModuleTile(
           courseId: courseId,
@@ -97,7 +97,7 @@ class _ModuleListState extends State<ModuleList> {
         );
       },
       separatorBuilder: (context, index) => const SizedBox(
-        height: 12.0,
+        height: 12,
       ),
     );
   }
@@ -176,7 +176,7 @@ class _ModuleTileState extends State<ModuleTile> {
           children: [
             Theme(
               data: theme,
-              child: const Divider(height: 1.0),
+              child: const Divider(height: 1),
             ),
             Theme(
               data: theme,
@@ -282,27 +282,27 @@ class _ModuleItemListState extends State<ModuleItemList>
       itemBuilder: (context, index, moduleItem) {
         var type = moduleItem.type;
 
-        Widget? title;
-        var data = utils.castOrNull<String>(moduleItem.title);
-        if (data != null) {
-          title = Text(data);
-        }
-
         // Build leading.
         Widget? leading = moduleItemTypeIcons[type];
         double? horizontalTitleGap;
         var indent = utils.tryParseInt(moduleItem.indent);
         if (indent != null && indent > 0) {
-          var indentUnitSize = IconTheme.of(context).size ?? 24.0;
+          var indentUnitSize = IconTheme.of(context).size ?? 24;
           if (leading == null) {
             leading = SizedBox(width: indentUnitSize * indent);
-            horizontalTitleGap = 0.0;
+            horizontalTitleGap = 0;
           } else {
             leading = Padding(
               padding: EdgeInsets.only(left: indentUnitSize * indent),
               child: leading,
             );
           }
+        }
+
+        Widget? title;
+        var data = utils.castOrNull<String>(moduleItem.title);
+        if (data != null) {
+          title = Text(data);
         }
 
         Widget? trailing;
@@ -322,7 +322,7 @@ class _ModuleItemListState extends State<ModuleItemList>
                     text: data,
                     style: TextStyle(color: Colors.blue),
                   ),
-                  WidgetSpan(child: const SizedBox(width: 8.0)),
+                  WidgetSpan(child: const SizedBox(width: 8)),
                 ],
                 WidgetSpan(
                   child: const Icon(Icons.launch),
@@ -351,7 +351,7 @@ class _ModuleItemListState extends State<ModuleItemList>
                     text: data,
                     style: TextStyle(color: Colors.blue),
                   ),
-                  WidgetSpan(child: const SizedBox(width: 8.0)),
+                  WidgetSpan(child: const SizedBox(width: 8)),
                 ],
                 WidgetSpan(
                   child: const Icon(Icons.launch),
@@ -396,10 +396,10 @@ class _ModuleItemListState extends State<ModuleItemList>
           onTap: onTap,
           onLongPress: onLongPress,
           horizontalTitleGap: horizontalTitleGap,
-          minLeadingWidth: 0.0,
+          minLeadingWidth: 0,
         );
       },
-      separatorBuilder: (context, index) => const Divider(height: 0.0),
+      separatorBuilder: (context, index) => const Divider(height: 0),
     );
   }
 
